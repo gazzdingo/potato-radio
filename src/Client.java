@@ -56,6 +56,7 @@ public class Client{
     public void checkForElections(){
         Socket MyClient;
         MyClient = new Socket(leftIP(), RMI.TCP_ELECTION_PORT);
+        
 
 
     }
