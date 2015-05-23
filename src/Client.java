@@ -17,6 +17,7 @@ public class Client{
 //        setLeader(serverURI);
 //        setMemory(Runtime.getRuntime().freeMemory());
 //        setIp(InetAddress.getLocalHost().getHostAddress());
+
     }
 
     public void setIp(String ip) {
@@ -45,7 +46,7 @@ public class Client{
         try {
 
             ServerSocket serverSocket = new ServerSocket(RMI.TCP_ELECTION_PORT);
-            bla = serverSocket.accept();
+//            bla = serverSocket.accept();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -53,10 +54,10 @@ public class Client{
 
 
     }
-    public void checkForElections(){
+    public void checkForElections() throws IOException {
         Socket MyClient;
         MyClient = new Socket(leftIP(), RMI.TCP_ELECTION_PORT);
-        MyClient = new short[]
+
 
 
     }
@@ -64,6 +65,8 @@ public class Client{
     private String leftIP() {
         return "";
     }
+
+
 
 
 }
