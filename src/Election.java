@@ -19,7 +19,7 @@ public class Election implements Serializable {
         this.winningMemory = memory;
     }
 
-     public void checkAndUpDateElection(String ip, long memory){
+     public void vote(String ip, long memory){
 
          if(memory > winningMemory){
              winningMemory = memory;
@@ -30,6 +30,10 @@ public class Election implements Serializable {
 
     public int getState() {
         return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 
     public long getWinnerMemory() {

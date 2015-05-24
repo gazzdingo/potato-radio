@@ -10,19 +10,14 @@ public class Main {
 
     public static void main(String[] args){
         try {
+            RMI rmi = new RMI();
+            rmi.start();
             Client client = new Client("localhost");
 
+            rmi.broadcastMusic();
+           new  Thread(client::receiveMusic);
 
-            new Thread(client::sendElectionMessage).start();
-            new Thread(client::checkForElections).start();
-
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (UnknownHostException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
