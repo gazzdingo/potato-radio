@@ -19,6 +19,7 @@ public class Client{
     private AdvancedPlayer player;
     private String leftIP;
     private String rightIP;
+    private RMI rmi;
 
     public Client(String serverURI) throws RemoteException, NotBoundException, MalformedURLException, UnknownHostException {
         setLeader(serverURI);
@@ -41,6 +42,8 @@ public class Client{
     public String getIp() {
         return ip;
     }
+
+
 
 
     /**
@@ -90,24 +93,11 @@ public class Client{
     /**
      * this will set up and send the init leader election if it can not connect to the remote host
      */
-    public void sendElectionMessage() {
+    public void startElectionMessage() {
 
         //creating the new election when you are not able to connect to the server
         Election election = new Election(this.getIp(),this.getMemory());
-        try {
-            //setting up the tcp sending socket
-            Socket clientSocket = new Socket(getLeftIP(), RMI.TCP_ELECTION_PORT);
-            // writing the object to the output buffer
-            ObjectOutputStream outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
-            outToServer.writeObject(election);
-            //closing the connections
-            clientSocket.close();
-            outToServer.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        sendMessageLeft(election);
 
     }
 
@@ -163,6 +153,19 @@ public class Client{
      * @param election
      */
     private void sendMessageLeft(Election election) {
+        try {
+            //setting up the tcp sending socket
+            Socket clientSocket = new Socket(getLeftIP(), RMI.TCP_ELECTION_PORT);
+            // writing the object to the output buffer
+            ObjectOutputStream outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
+            outToServer.writeObject(election);
+            //closing the connections
+            clientSocket.close();
+            outToServer.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -170,6 +173,16 @@ public class Client{
      * this will set up the rmi server if you have been elected as the leader
      */
     private void startRMIServer() {
+        try {
+            // create the new rmi server
+            rmi = new RMI();
+            // start the new rmi server
+            rmi.start();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
