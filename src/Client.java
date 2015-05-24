@@ -97,7 +97,7 @@ public class Client{
         try {
             //setting up the tcp sending socket
             Socket clientSocket = new Socket(getLeftIP(), RMI.TCP_ELECTION_PORT);
-            // writing the objec to the output buffer
+            // writing the object to the output buffer
             ObjectOutputStream outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
             outToServer.writeObject(election);
             //closing the connections

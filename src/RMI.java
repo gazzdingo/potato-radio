@@ -83,20 +83,23 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
         this.hosts.add(host);
     }
 
-
+    /**
+     * will send out the music to all of the clients to listen to
+     */
     public void broadcastMusic(){
         try {
             int port = this.UDP_MUSIC_PORT;
+            // this is the path that the music is hosted
             Path path = Paths.get("wana.mp3");
             byte[] data = Files.readAllBytes(path);
-
+            // loop though all the hosts so that is can send out the music to them
             for(String host : ipAddresses()) {
-                // Get the internet address of the specified host
-
+                // the size of the byte that will be sent out
                 int splitSize =  2000;
-                InetAddress address = InetAddress.getByName("localhost");
+                // get the host address
+                InetAddress address = InetAddress.getByName(host);
                 DatagramSocket dsocket = new DatagramSocket();
-
+                //loop through splitting up the byte array
                 for(int i = 0; i < data.length ; ) {
                     byte[] temp = new byte[splitSize];
 
@@ -107,8 +110,6 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
                             address, port);
                     dsocket.send(packet);
                 }
-
-                // Create a datagram socket, send the packet through it, close it.
 
                 dsocket.close();
             }
