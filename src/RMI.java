@@ -10,9 +10,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by guylangford-lee on 22/05/15.
@@ -26,13 +24,12 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
     public static final int RMI_PORT = 1099;
     private String address;
     private Registry registry;
-    private List<String> hosts;
-    private List<String> songPlayList;
+    private Set<String> hosts;
     private List<String> messages;
 
     protected RMI() throws RemoteException {
         super();
-        hosts = new ArrayList<>();
+        hosts = new HashSet<>();
         messages = new LinkedList<>();
 
     }
@@ -69,7 +66,7 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
     }
 
     @Override
-    public List<String> ipAddresses() throws RemoteException {
+    public Set<String> ipAddresses() throws RemoteException {
         return hosts;
 
     }

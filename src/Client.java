@@ -85,11 +85,9 @@ public class Client{
              catch (Exception e){
                 startElectionMessage();
              }
-        if(!remoteServer.ipAddresses().contains(ip)) {
-            //adding this clients ip to the remote server
 
             remoteServer.addHost(ip);
-        }
+
             //looping through setting up the the right and left ip for the leader election
             for (int i =0 ; i< remoteServer.ipAddresses().size(); i++){
                 //checking to make sure that it is not the first client
