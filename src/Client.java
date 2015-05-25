@@ -1,5 +1,4 @@
-import javazoom.jl.player.Player;
-import javazoom.jl.player.advanced.AdvancedPlayer;
+
 
 import javax.sound.sampled.*;
 import java.io.*;
@@ -18,9 +17,8 @@ public class Client{
     private boolean checkForElections = true;
 
     long memory;
-    String ip;
+    private String ip;
     private boolean playingMusic = true;
-    private Player player;
     private String leftIP;
     private String rightIP;
     private RMI rmi;
@@ -30,7 +28,7 @@ public class Client{
         this.userName = userName;
         setLeader(serverURI);
         setMemory(Runtime.getRuntime().freeMemory());
-        setIp(InetAddress.getLocalHost().getHostAddress());
+
     }
 
     public void setIp(String ip) {
@@ -65,16 +63,21 @@ public class Client{
 
          remoteServer = (RemoteMusicInter) Naming.lookup(connectUrl);
         // making sure that the client does not already on the server
-        setUpIP();
+        try {
+            setUpIP();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
 
 
     }
 
-    private void setUpIP() throws RemoteException {
-        if(!remoteServer.ipAddresses().contains(getIp())) {
-
+    private void setUpIP() throws RemoteException, UnknownHostException {
+        String ip = InetAddress.getLocalHost().getHostAddress();
+        if(!remoteServer.ipAddresses().contains(ip)) {
             //adding this clients ip to the remote server
-            remoteServer.addHost("localhost");
+
+            remoteServer.addHost(ip);
             //looping through setting up the the right and left ip for the leader election
             for (int i =0 ; i< remoteServer.ipAddresses().size(); i++){
                 //checking to make sure that it is not the first client
@@ -96,8 +99,8 @@ public class Client{
 
                     }
                     else{
-                        leftIP = (getIp());
-                        rightIP = (getIp());
+                        leftIP = (ip);
+                        rightIP = (ip);
                     }
                 }
 

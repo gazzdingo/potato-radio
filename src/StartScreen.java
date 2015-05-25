@@ -41,7 +41,6 @@ public class StartScreen {
                          client = new Client(serverHost.getText(), username.getText());
                         new Thread(client::checkForElections).start();
                         new Thread(client::receiveMusic).start();
-                        new Thread(rmi::send).start();
 
 
 
@@ -60,6 +59,8 @@ public class StartScreen {
             try {
                 rmi = new RMI();
                 rmi.start();
+                new Thread(rmi::send).start();
+
 
                 System.out.println("started Server");
             } catch (RemoteException e1) {

@@ -155,6 +155,7 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
                 int cnt = 0 ;
                 while( true )
                 {
+
                     targetDataLine.read( tempBuffer , 0 , tempBuffer.length );
                     sendThruUDP( tempBuffer ) ;
                 }
@@ -193,6 +194,7 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
         {
             DatagramSocket sock = new DatagramSocket() ;
             for(String host : ipAddresses()) {
+                System.out.println(host);
                 sock.send(new DatagramPacket(soundpacket, soundpacket.length, InetAddress.getByName(host), this.UDP_MUSIC_PORT));
             }
             sock.close() ;
