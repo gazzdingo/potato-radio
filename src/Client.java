@@ -1,5 +1,7 @@
 
 
+import sun.tools.tree.SynchronizedStatement;
+
 import javax.sound.sampled.*;
 import java.io.*;
 import java.net.*;
@@ -63,19 +65,15 @@ public class Client{
 
          remoteServer = (RemoteMusicInter) Naming.lookup(connectUrl);
         // making sure that the client does not already on the server
-            setUpIP();
+//            setUpIP();
 
 
 
     }
 
-    public void setUpIP()  {
+    public synchronized void setUpIP()  {
         while(playingMusic){
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
             String ip = null;
             try {
                 ip = InetAddress.getLocalHost().getHostAddress();
@@ -117,6 +115,7 @@ public class Client{
                         rightIP = (ip);
                     }
                 }
+                Thread.sleep(100);
 
 
             } catch (Exception e) {
@@ -141,10 +140,10 @@ public class Client{
     /**
      * this will be run in a thead to  loop though and check if someone has send you a leader election
      */
-    public void checkForElections() {
+    public synchronized void checkForElections() {
         while (checkForElections) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             ServerSocket serverSocket = new ServerSocket(RMI.TCP_ELECTION_PORT);
 
             //get the client socket
@@ -238,7 +237,7 @@ public class Client{
      * this will attempt to get the streaming music off of the sever and startplaying it
      * todo: i(GUY) need to check if it is working as the server is sending to large files
      */
-    public void receiveMusic(){
+    public synchronized void receiveMusic(){
 
 
         while(playingMusic) {
