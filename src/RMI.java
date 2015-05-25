@@ -11,6 +11,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,17 +22,18 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
     public static final String BIND_NAME = "potatoserver";
     public static final int TCP_ELECTION_PORT = 8181 ;
     public static final int UDP_MUSIC_PORT = 8182 ;
-    public static final int MUSIC_BYTE_SEND_SIZE = 2000 ;
+    public static final int MUSIC_BYTE_SEND_SIZE = 2500 ;
     public static final int RMI_PORT = 1099;
     private String address;
     private Registry registry;
     private List<String> hosts;
     private List<String> songPlayList;
+    private List<String> messages;
 
     protected RMI() throws RemoteException {
         super();
         hosts = new ArrayList<>();
-        songPlayList = new ArrayList<>();
+        messages = new LinkedList<>();
 
     }
 
@@ -56,20 +58,14 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
     }
 
 
-
     @Override
-    public String currentPlaying() throws RemoteException {
-        return null;
+    public List<String> messages() throws RemoteException {
+        return messages;
     }
 
     @Override
-    public int requestSong(String songName) throws RemoteException {
-        return 0;
-    }
-
-    @Override
-    public List<String> requestSongPlaylist() throws RemoteException {
-        return  songPlayList;
+    public void addMessage(String message, VectorTimeStamp timeStamp) throws RemoteException {
+        messages.add(message);
     }
 
     @Override
@@ -155,7 +151,7 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
                 TargetDataLine targetDataLine = (TargetDataLine)AudioSystem.getLine( dataLineInfo  ) ;
                 targetDataLine.open( getAudioFormat() );
                 targetDataLine.start();
-                byte tempBuffer[] = new byte[1000] ;
+                byte tempBuffer[] = new byte[this.MUSIC_BYTE_SEND_SIZE] ;
                 int cnt = 0 ;
                 while( true )
                 {

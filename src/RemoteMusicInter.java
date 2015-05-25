@@ -8,9 +8,9 @@ import java.util.List;
  */
 public interface RemoteMusicInter extends Remote, Serializable {
 
-    String currentPlaying() throws RemoteException;
-    int requestSong(String songName) throws  RemoteException;
-    List<String> requestSongPlaylist() throws RemoteException;
+
+    List<String> messages() throws  RemoteException;
+    void addMessage(String message, VectorTimeStamp timeStamp) throws RemoteException;
     List<String> ipAddresses() throws RemoteException;
     void addHost(String host) throws RemoteException;
 

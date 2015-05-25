@@ -7,11 +7,13 @@ import java.net.*;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.List;
 
 /**
  * Created by guylangford-lee on 22/05/15.
  */
 public class Client{
+    private final String userName;
     RemoteMusicInter remoteServer;
     private boolean checkForElections = true;
 
@@ -23,7 +25,9 @@ public class Client{
     private String rightIP;
     private RMI rmi;
 
-    public Client(String serverURI) throws RemoteException, NotBoundException, MalformedURLException, UnknownHostException {
+    public Client(String serverURI, String userName) throws RemoteException, NotBoundException, MalformedURLException, UnknownHostException {
+
+        this.userName = userName;
         setLeader(serverURI);
         setMemory(Runtime.getRuntime().freeMemory());
         setIp(InetAddress.getLocalHost().getHostAddress());
@@ -61,36 +65,45 @@ public class Client{
 
          remoteServer = (RemoteMusicInter) Naming.lookup(connectUrl);
         // making sure that the client does not already on the server
-            if(!remoteServer.ipAddresses().contains(getIp())) {
+        setUpIP();
 
-                //adding this clients ip to the remote server
-//                System.out.println(getIp());
-                remoteServer.addHost("localhost");
-                //looping through setting up the the right and left ip for the leader election
-                for (int i =0 ; i< remoteServer.ipAddresses().size(); i++){
-                    //checking to make sure that it is not the first client
-                        if(i != 0){
-                            //checking if it is the end client
-                            if(remoteServer.ipAddresses().size()-1 == i){
-                                //assigning the left and right ip
-                                leftIP = remoteServer.ipAddresses().get(i-1);
-                                rightIP = remoteServer.ipAddresses().get(0);
-                            }else{
-                                //assigning  the left and right ip
-                                leftIP = remoteServer.ipAddresses().get(i-1);
-                                rightIP = remoteServer.ipAddresses().get(i+1);
-                            }
 
+    }
+
+    private void setUpIP() throws RemoteException {
+        if(!remoteServer.ipAddresses().contains(getIp())) {
+
+            //adding this clients ip to the remote server
+            remoteServer.addHost("localhost");
+            //looping through setting up the the right and left ip for the leader election
+            for (int i =0 ; i< remoteServer.ipAddresses().size(); i++){
+                //checking to make sure that it is not the first client
+                    if(remoteServer.ipAddresses().size() != 1){
+                        //checking if it is the end client
+                        if(i == 0){
+                            leftIP = remoteServer.ipAddresses().get(remoteServer.ipAddresses().size()-1);
+                            rightIP = remoteServer.ipAddresses().get(i+1);
                         }
+                        else if(remoteServer.ipAddresses().size()-1 == i){
+                            //assigning the left and right ip
+                            leftIP = remoteServer.ipAddresses().get(i-1);
+                            rightIP = remoteServer.ipAddresses().get(0);
+                        }else{
+                            //assigning  the left and right ip
+                            leftIP = remoteServer.ipAddresses().get(i-1);
+                            rightIP = remoteServer.ipAddresses().get(i+1);
+                        }
+
                     }
+                    else{
+                        leftIP = (getIp());
+                        rightIP = (getIp());
+                    }
+                }
 
 
 
-            }
-
-
-
-
+        }
     }
 
 
@@ -109,7 +122,6 @@ public class Client{
      * this will be run in a thead to  loop though and check if someone has send you a leader election
      */
     public void checkForElections() {
-        System.out.println("el");
         while (checkForElections) {
             try {
             ServerSocket serverSocket = new ServerSocket(RMI.TCP_ELECTION_PORT);
@@ -124,20 +136,23 @@ public class Client{
             //check if there is a winner
             if (election.getState() == Election.ELECTED_WINNER) {
                 //checking if you are the winner
-                if (election.getWinnerIP() == this.getIp()) {
-                    startRMIServer();
-                } else {
+                if (election.getWinnerIP() != this.getIp()) {
+
                     try {
                         //set the leader to the new leader that is elected
                         setLeader(election.getWinnerIP());
+                        sendMessageLeft(election);
                     } catch (NotBoundException e) {
                         e.printStackTrace();
                     }
                 }
             }
             //checking if you have been elected as the leader
-            if (election.getWinnerIP() == this.getIp()) {
+           else if (election.getWinnerIP() == this.getIp()) {
                 election.setState(Election.ELECTED_WINNER);
+                startRMIServer();
+                sendMessageLeft(election);
+
             } else {
                 election.vote(this.getIp(), this.getMemory());
                 sendMessageLeft(election);
@@ -263,7 +278,7 @@ public class Client{
         try
         {
             DatagramSocket sock = new DatagramSocket(RMI.UDP_MUSIC_PORT) ;
-            byte soundpacket[] = new byte[1000] ;
+            byte soundpacket[] = new byte[RMI.MUSIC_BYTE_SEND_SIZE] ;
             DatagramPacket datagram = new DatagramPacket( soundpacket , soundpacket.length , InetAddress.getByName("localhost") , RMI.UDP_MUSIC_PORT ) ;
             sock.receive( datagram ) ;
             sock.close() ;
@@ -299,6 +314,9 @@ public class Client{
     }
 
 
+
+
+
     public  AudioFormat getAudioFormat()
     {
         float sampleRate = 8000.0F;
@@ -312,6 +330,22 @@ public class Client{
         boolean bigEndian = false;
         //true,false
         return new AudioFormat( sampleRate, sampleSizeInBits, channels, signed, bigEndian );
+    }
+
+    public List<String> getMessages(){
+        try {
+            return remoteServer.messages();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public void addMessage(String message){
+        try {
+            remoteServer.addMessage(String.format("potato man %s: %s", userName,message),new VectorTimeStamp());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
 
