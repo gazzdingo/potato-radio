@@ -1,5 +1,7 @@
+import javazoom.jl.player.Player;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 
+import javax.sound.sampled.*;
 import java.io.*;
 import java.net.*;
 import java.rmi.Naming;
@@ -16,7 +18,7 @@ public class Client{
     long memory;
     String ip;
     private boolean playingMusic = true;
-    private AdvancedPlayer player;
+    private Player player;
     private String leftIP;
     private String rightIP;
     private RMI rmi;
@@ -59,9 +61,11 @@ public class Client{
 
          remoteServer = (RemoteMusicInter) Naming.lookup(connectUrl);
         // making sure that the client does not already on the server
-            if(remoteServer.ipAddresses().contains(getIp())) {
+            if(!remoteServer.ipAddresses().contains(getIp())) {
+
                 //adding this clients ip to the remote server
-                remoteServer.addHost(getIp());
+//                System.out.println(getIp());
+                remoteServer.addHost("localhost");
                 //looping through setting up the the right and left ip for the leader election
                 for (int i =0 ; i< remoteServer.ipAddresses().size(); i++){
                     //checking to make sure that it is not the first client
@@ -105,7 +109,7 @@ public class Client{
      * this will be run in a thead to  loop though and check if someone has send you a leader election
      */
     public void checkForElections() {
-
+        System.out.println("el");
         while (checkForElections) {
             try {
             ServerSocket serverSocket = new ServerSocket(RMI.TCP_ELECTION_PORT);
@@ -199,34 +203,46 @@ public class Client{
      * todo: i(GUY) need to check if it is working as the server is sending to large files
      */
     public void receiveMusic(){
+
+
         while(playingMusic) {
             try {
 
-                //setting up the udp receivers
-                DatagramSocket socket = new DatagramSocket(RMI.UDP_MUSIC_PORT);
-                byte[] buffer = new byte[RMI.MUSIC_BYTE_SEND_SIZE];
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                while (playingMusic) {
-                    // Wait to receive a datagram
-
-
-                    socket.receive(packet);
-                    // Convert the contents to a string, and display them
-                    String msg = new String(buffer, 0, packet.getLength());
-
-                    byte[] data = packet.getData();
-
-                    ByteArrayInputStream in = new ByteArrayInputStream(data);
-
-
-                    this.player = new AdvancedPlayer(in);
-                    player.play();
-
-                    // Reset the length of the packet before reusing it.
-                    packet.setLength(buffer.length);
-
-
+                byte b[] = null ;
+                while(playingMusic )
+                {
+                    b = receiveThruUDP() ;
+                    toSpeaker( b ) ;
                 }
+
+//                //setting up the udp receivers
+//                DatagramSocket socket = new DatagramSocket(RMI.UDP_MUSIC_PORT);
+//                byte[] buffer = new byte[RMI.MUSIC_BYTE_SEND_SIZE];
+//
+//                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+//                while (playingMusic) {
+//                    // Wait to receive a datagram
+//
+//
+//                    socket.receive(packet);
+//                    // Convert the contents to a string, and display them
+//                    String msg = new String(buffer, 0, packet.getLength());
+//
+//                    byte[] data = packet.getData();
+//                    for (byte b : data) {
+//                        System.out.println(b);
+//                    }
+//                    ByteArrayInputStream in = new ByteArrayInputStream(data);
+//
+//
+//                    this.player = new Player(in);
+//                    player.play();
+//
+//                    // Reset the length of the packet before reusing it.
+//                    packet.setLength(buffer.length);
+//
+//
+//                }
 
 
             } catch (Exception e) {
@@ -237,4 +253,73 @@ public class Client{
 
 
 
+
+
+
+
+
+    public byte[] receiveThruUDP()
+    {
+        try
+        {
+            DatagramSocket sock = new DatagramSocket(RMI.UDP_MUSIC_PORT) ;
+            byte soundpacket[] = new byte[1000] ;
+            DatagramPacket datagram = new DatagramPacket( soundpacket , soundpacket.length , InetAddress.getByName("localhost") , RMI.UDP_MUSIC_PORT ) ;
+            sock.receive( datagram ) ;
+            sock.close() ;
+            return datagram.getData(); // soundpacket ;
+        }
+        catch( Exception e )
+        {
+            System.out.println(" Unable to send soundpacket using UDP " ) ;
+            return null ;
+        }
+
+    }
+
+
+    public  void toSpeaker( byte soundbytes[] )
+    {
+
+        try{
+            DataLine.Info dataLineInfo = new DataLine.Info( SourceDataLine.class , getAudioFormat() ) ;
+            SourceDataLine sourceDataLine = (SourceDataLine)AudioSystem.getLine( dataLineInfo );
+            sourceDataLine.open( getAudioFormat() ) ;
+            sourceDataLine.start();
+            int cnt = 0;
+            sourceDataLine.write( soundbytes , 0, soundbytes.length );
+            sourceDataLine.drain() ;
+            sourceDataLine.close() ;
+        }
+        catch(Exception e )
+        {
+            System.out.println("not working in speakers " ) ;
+        }
+
+    }
+
+
+    public  AudioFormat getAudioFormat()
+    {
+        float sampleRate = 8000.0F;
+        //8000,11025,16000,22050,44100
+        int sampleSizeInBits = 16;
+        //8,16
+        int channels = 1;
+        //1,2
+        boolean signed = true;
+        //true,false
+        boolean bigEndian = false;
+        //true,false
+        return new AudioFormat( sampleRate, sampleSizeInBits, channels, signed, bigEndian );
+    }
+
+
 }
+
+
+
+
+
+
+

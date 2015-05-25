@@ -10,12 +10,14 @@ public class Main {
 
     public static void main(String[] args){
         try {
-            RMI rmi = new RMI();
-            rmi.start();
-            Client client = new Client("localhost");
 
-            rmi.broadcastMusic();
-           new  Thread(client::receiveMusic);
+            StartScreen startScreen = new StartScreen();
+//            RMI rmi = new RMI();
+//            rmi.start();
+//            Client client = new Client("localhost");
+//
+//            rmi.broadcastMusic();
+//           new  Thread(client::receiveMusic);
 
         } catch (Exception e) {
             e.printStackTrace();
