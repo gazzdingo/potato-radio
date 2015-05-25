@@ -72,29 +72,24 @@ public class Client{
     }
 
     public synchronized void setUpIP()  {
-        String ip = "";
-        try {
-            ip = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-
         while(playingMusic){
 
+            String ip = null;
             try {
-                System.out.println("hello im " + ip);
+                ip = InetAddress.getLocalHost().getHostAddress();
+
 
             try{
                 remoteServer.ipAddresses();
              }
              catch (Exception e){
                 startElectionMessage();
-                 System.out.println("fuck");
              }
             if(!remoteServer.ipAddresses().contains(ip)) {
+                System.out.println("test");
                 remoteServer.addHost(ip);
             }
-                System.out.println(remoteServer.ipAddresses());
+
             //looping through setting up the the right and left ip for the leader election
             for (int i =0 ; i< remoteServer.ipAddresses().size(); i++){
                 //checking to make sure that it is not the first client
@@ -120,7 +115,7 @@ public class Client{
                         rightIP = (ip);
                     }
                 }
-                Thread.sleep(100);
+                Thread.sleep(2000);
 
 
             } catch (Exception e) {
@@ -242,7 +237,7 @@ public class Client{
      * this will attempt to get the streaming music off of the sever and startplaying it
      * todo: i(GUY) need to check if it is working as the server is sending to large files
      */
-    public synchronized void receiveMusic(){
+    public void receiveMusic(){
 
 
         while(playingMusic) {
@@ -252,37 +247,10 @@ public class Client{
                 while(playingMusic )
                 {
                     b = receiveThruUDP() ;
+                    System.out.println(b);
                     toSpeaker( b ) ;
                 }
 
-//                //setting up the udp receivers
-//                DatagramSocket socket = new DatagramSocket(RMI.UDP_MUSIC_PORT);
-//                byte[] buffer = new byte[RMI.MUSIC_BYTE_SEND_SIZE];
-//
-//                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-//                while (playingMusic) {
-//                    // Wait to receive a datagram
-//
-//
-//                    socket.receive(packet);
-//                    // Convert the contents to a string, and display them
-//                    String msg = new String(buffer, 0, packet.getLength());
-//
-//                    byte[] data = packet.getData();
-//                    for (byte b : data) {
-//                        System.out.println(b);
-//                    }
-//                    ByteArrayInputStream in = new ByteArrayInputStream(data);
-//
-//
-//                    this.player = new Player(in);
-//                    player.play();
-//
-//                    // Reset the length of the packet before reusing it.
-//                    packet.setLength(buffer.length);
-//
-//
-//                }
 
 
             } catch (Exception e) {

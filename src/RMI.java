@@ -160,9 +160,10 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
             }
             catch(Exception e )
             {
-                System.out.println(" not correct " ) ;
-                System.exit(0) ;
+                System.out.println(" not correct ") ;
             }
+        }else{
+            System.out.println("NOT SUPPORTED");
         }
 
 
@@ -191,8 +192,8 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
         {
             DatagramSocket sock = new DatagramSocket() ;
             for(String host : ipAddresses()) {
-                System.out.println(host);
                 sock.send(new DatagramPacket(soundpacket, soundpacket.length, InetAddress.getByName(host), this.UDP_MUSIC_PORT));
+
             }
             sock.close() ;
         }
