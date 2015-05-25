@@ -328,16 +328,17 @@ public class Client{
     public List<String> getMessages(){
         try {
             return remoteServer.messages();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) {
+                startElectionMessage();
+
+            }
         return null;
     }
     public void addMessage(String message){
         try {
             remoteServer.addMessage(String.format("potato man %s: %s", userName,message),new VectorTimeStamp());
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            startElectionMessage();
         }
     }
 
