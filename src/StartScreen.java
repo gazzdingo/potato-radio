@@ -62,6 +62,8 @@ public class StartScreen {
                 rmi = new RMI();
                 rmi.start();
                 new Thread(rmi::send).start();
+                client = new Client("localhost", username.getText());
+
 
 
                 System.out.println("started Server");
