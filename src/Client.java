@@ -71,6 +71,11 @@ public class Client{
 
     public void setUpIP()  {
         while(playingMusic){
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             String ip = null;
             try {
                 ip = InetAddress.getLocalHost().getHostAddress();
@@ -139,6 +144,7 @@ public class Client{
     public void checkForElections() {
         while (checkForElections) {
             try {
+                Thread.sleep(500);
             ServerSocket serverSocket = new ServerSocket(RMI.TCP_ELECTION_PORT);
 
             //get the client socket
