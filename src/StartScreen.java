@@ -41,6 +41,7 @@ public class StartScreen {
                          client = new Client(serverHost.getText(), username.getText());
                         new Thread(client::checkForElections).start();
                         new Thread(client::receiveMusic).start();
+                        new Thread(client::setUpIP).start();
 
 
 
@@ -70,8 +71,10 @@ public class StartScreen {
             }
         });
         JTextArea sendMessage = new JTextArea();
+        sendMessage.setLineWrap(true);
 
         JTextArea messages = new JTextArea();
+        messages.setLineWrap(true);
         new Thread(()->{
              while(true){
                try {
