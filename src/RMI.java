@@ -24,12 +24,12 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
     public static final int RMI_PORT = 1099;
     private String address;
     private Registry registry;
-    private Set<String> hosts;
+    private List<String> hosts;
     private List<String> messages;
 
     protected RMI() throws RemoteException {
         super();
-        hosts = new HashSet<>();
+        hosts = new LinkedList<>();
         messages = new LinkedList<>();
 
     }
@@ -66,7 +66,7 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
     }
 
     @Override
-    public Set<String> ipAddresses() throws RemoteException {
+    public List<String> ipAddresses() throws RemoteException {
         return hosts;
 
     }

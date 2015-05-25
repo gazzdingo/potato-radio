@@ -72,22 +72,29 @@ public class Client{
     }
 
     public synchronized void setUpIP()  {
+        String ip = "";
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
         while(playingMusic){
 
-            String ip = null;
             try {
-                ip = InetAddress.getLocalHost().getHostAddress();
-
+                System.out.println("hello im " + ip);
 
             try{
                 remoteServer.ipAddresses();
              }
              catch (Exception e){
                 startElectionMessage();
+                 System.out.println("fuck");
              }
-
-            remoteServer.addHost(ip);
-
+            if(!remoteServer.ipAddresses().contains(ip)) {
+                remoteServer.addHost(ip);
+            }
+                System.out.println(remoteServer.ipAddresses());
             //looping through setting up the the right and left ip for the leader election
             for (int i =0 ; i< remoteServer.ipAddresses().size(); i++){
                 //checking to make sure that it is not the first client

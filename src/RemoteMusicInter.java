@@ -12,7 +12,7 @@ public interface RemoteMusicInter extends Remote, Serializable {
 
     List<String> messages() throws  RemoteException;
     void addMessage(String message, VectorTimeStamp timeStamp) throws RemoteException;
-    Set<String> ipAddresses() throws RemoteException;
+    List<String> ipAddresses() throws RemoteException;
     void addHost(String host) throws RemoteException;
 
 

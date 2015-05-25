@@ -39,9 +39,9 @@ public class StartScreen {
                         System.out.println("started Client");
                         System.out.println(serverHost.getText());
                          client = new Client(serverHost.getText(), username.getText());
+                        new Thread(client::setUpIP).start();
                         new Thread(client::checkForElections).start();
                         new Thread(client::receiveMusic).start();
-                        new Thread(client::setUpIP).start();
 
 
 
