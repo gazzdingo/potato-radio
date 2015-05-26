@@ -65,7 +65,7 @@ public class StartScreen {
             try {
                 rmi = new RMI();
                 rmi.start();
-                new Thread(rmi::send).start();
+                new Thread(rmi::broadcastMusic).start();
                 client = new Client("localhost", username.getText());
 
 

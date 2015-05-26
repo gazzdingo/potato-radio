@@ -12,10 +12,10 @@ import java.util.List;
  * Created by guylangford-lee on 22/05/15.
  */
 public class Client{
-    private final String userName;
+    private  String userName;
     RemoteMusicInter remoteServer;
     private boolean checkForElections = true;
-
+    public static final AudioFormat AUDIO_FORMAT = new AudioFormat( 8000f, 16, 2, true, false );
     long memory;
     private String ip;
     private boolean playingMusic = true;
@@ -234,7 +234,7 @@ public class Client{
             rmi = new RMI();
             // start the new rmi server
             rmi.start();
-            new Thread(rmi::send).start();
+            new Thread(rmi::broadcastMusic).start();
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -255,71 +255,37 @@ public class Client{
      * this will attempt to get the streaming music off of the sever and startplaying it
      * todo: i(GUY) need to check if it is working as the server is sending to large files
      */
-    public void receiveMusic(){
-
-
+    public void receiveMusic() {
         while(playingMusic) {
             try {
-
-                byte b[] = null ;
-                while(playingMusic )
-                {
-                    b = receiveThruUDP() ;
-                    System.out.println(b);
-                    toSpeaker( b ) ;
-                }
-
-
-
+                DatagramSocket sock = new DatagramSocket(RMI.UDP_MUSIC_PORT);
+                byte soundpacket[] = new byte[RMI.MUSIC_BYTE_SEND_SIZE];
+                DatagramPacket datagram = new DatagramPacket(soundpacket, soundpacket.length, InetAddress.getByName("localhost"), RMI.UDP_MUSIC_PORT);
+                sock.receive(datagram);
+                sock.close();
+                sendDataToSoundOutput(datagram.getData()); // soundpacket ;
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(" Unable to send soundpacket using UDP ");
             }
         }
-    }
-
-
-
-
-
-
-
-
-    public byte[] receiveThruUDP()
-    {
-        try
-        {
-            DatagramSocket sock = new DatagramSocket(RMI.UDP_MUSIC_PORT) ;
-            byte soundpacket[] = new byte[RMI.MUSIC_BYTE_SEND_SIZE] ;
-            DatagramPacket datagram = new DatagramPacket( soundpacket , soundpacket.length , InetAddress.getByName("localhost") , RMI.UDP_MUSIC_PORT ) ;
-            sock.receive( datagram ) ;
-            sock.close() ;
-            return datagram.getData(); // soundpacket ;
-        }
-        catch( Exception e )
-        {
-            System.out.println(" Unable to send soundpacket using UDP " ) ;
-            return null ;
-        }
 
     }
 
 
-    public  void toSpeaker( byte soundbytes[] )
-    {
+    public  void sendDataToSoundOutput(byte soundbytes[]) {
 
         try{
-            DataLine.Info dataLineInfo = new DataLine.Info( SourceDataLine.class , getAudioFormat() ) ;
+            DataLine.Info dataLineInfo = new DataLine.Info( SourceDataLine.class ,AUDIO_FORMAT ) ;
             SourceDataLine sourceDataLine = (SourceDataLine)AudioSystem.getLine( dataLineInfo );
-            sourceDataLine.open( getAudioFormat() ) ;
+            sourceDataLine.open( AUDIO_FORMAT ) ;
             sourceDataLine.start();
-            int cnt = 0;
             sourceDataLine.write( soundbytes , 0, soundbytes.length );
             sourceDataLine.drain() ;
             sourceDataLine.close() ;
         }
         catch(Exception e )
         {
-            System.out.println("not working in speakers " ) ;
+            e.printStackTrace();
         }
 
     }
@@ -328,20 +294,8 @@ public class Client{
 
 
 
-    public  AudioFormat getAudioFormat()
-    {
-        float sampleRate = 8000.0F;
-        //8000,11025,16000,22050,44100
-        int sampleSizeInBits = 16;
-        //8,16
-        int channels = 1;
-        //1,2
-        boolean signed = true;
-        //true,false
-        boolean bigEndian = false;
-        //true,false
-        return new AudioFormat( sampleRate, sampleSizeInBits, channels, signed, bigEndian );
-    }
+
+
 
     public List<String> getMessages(){
         try {
