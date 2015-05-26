@@ -121,8 +121,6 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
         }
         catch( Exception e )
         {
-            e.printStackTrace() ;
-            System.out.println(" Unable to send soundpacket using UDP ") ;
         }
 
     }
