@@ -141,6 +141,12 @@ public class Client{
      * this will be run in a thead to  loop though and check if someone has send you a leader election
      */
     public void checkForElections() {
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(RMI.TCP_ELECTION_PORT);
@@ -155,7 +161,6 @@ public class Client{
                 serverSocket.setSoTimeout(10000);
 
                 Socket clientSocket = serverSocket.accept();
-                System.out.println(clientSocket.getInetAddress());
             //the object input stream
             ObjectInputStream objInStream = new ObjectInputStream(clientSocket.getInputStream());
             // the election object
@@ -164,11 +169,14 @@ public class Client{
             //check if there is a winner
             if (election.getState() == Election.ELECTED_WINNER) {
                 //checking if you are the winner
-                if (election.getWinnerIP() != this.getIp()) {
+                System.out.println(election.getWinnerIP());
+                if (election.getWinnerIP() != ip) {
 
                     try {
                         //set the leader to the new leader that is elected
                         setLeader(election.getWinnerIP());
+                        System.out.println(election.getWinnerIP() + " send");
+
                         sendMessageLeft(election);
                     } catch (NotBoundException e) {
                         e.printStackTrace();
@@ -176,13 +184,14 @@ public class Client{
                 }
             }
             //checking if you have been elected as the leader
-           else if (election.getWinnerIP() == this.getIp()) {
+           else if (election.getWinnerIP() == ip) {
                 election.setState(Election.ELECTED_WINNER);
                 startRMIServer();
+
                 sendMessageLeft(election);
 
             } else {
-                election.vote(this.getIp(), this.getMemory());
+                election.vote(ip, this.getMemory());
                 sendMessageLeft(election);
             }
         } catch(Exception e){
@@ -201,7 +210,6 @@ public class Client{
     private void sendMessageLeft(Election election) {
         try {
             //setting up the tcp sending socket
-            System.out.println(getLeftIP());
             Socket clientSocket = new Socket(getLeftIP(), RMI.TCP_ELECTION_PORT);
 
             // writing the object to the output buffer
@@ -226,6 +234,7 @@ public class Client{
             rmi = new RMI();
             // start the new rmi server
             rmi.start();
+            new Thread(rmi::send).start();
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (Exception e) {
