@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
@@ -17,20 +16,25 @@ public class StartScreen {
     private Client client;
 
     public  StartScreen(){
-        jframe = new JFrame();
-        Dimension d = new Dimension(600,400);
+        jframe = new JFrame("Potato Radio Talk-Back");
+        Dimension d = new Dimension(780,450);
         jframe.setSize(d);
         init();
-       jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-       jframe.setLocationRelativeTo(null);
-       jframe.setVisible(true);
+        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jframe.setLocationRelativeTo(null);
+        jframe.setVisible(true);
     }
 
     private void init() {
         JPanel pane = new JPanel();
+
+
+
         JButton btnStartServer = new JButton("Start Server");
         JTextField serverHost = new JTextField();
         serverHost.setPreferredSize(new Dimension(160, 20));
+
+
         JButton btnStartClient = new JButton("StartClient");
         JTextField username = new JTextField("");
             btnStartClient.addActionListener(e -> {
@@ -93,6 +97,7 @@ public class StartScreen {
 
         sendMessage.setPreferredSize(new Dimension(100,100));
 
+        username.setPreferredSize(new Dimension(60,20));
 
         JButton btnSendMessage = new JButton("send message");
         btnSendMessage.addActionListener(e -> {
@@ -106,6 +111,11 @@ public class StartScreen {
             }
         });
 
+        messages.setEditable(false);
+
+
+
+
         pane.add(btnSendMessage);
         pane.add(sendMessage);
         pane.add(messages);
@@ -115,6 +125,27 @@ public class StartScreen {
 
         pane.add(btnStartClient);
         pane.add(btnStartServer);
+        //add image
+        JLabel label = new JLabel("");
+        Image img = new ImageIcon(this.getClass().getResource("/img/potato.jpg")).getImage();
+//        Dimension dimension = new Dimension(img.getWidth(null), img.getHeight(null));
+//        label.setPreferredSize(dimension);
+        label.setIcon(new ImageIcon(img));
+        label.setSize(100,100);
+        jframe.getContentPane().add(label);
         jframe.add(pane);
+    }
+
+    public BufferedImage resizeImg(BufferedImage img, int newW, int newH)
+    {
+        int w = img.getWidth();
+        int h = img.getHeight();
+        BufferedImage dimg = new BufferedImage(newW, newH, img.getType());
+        Graphics2D g = dimg.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(img, 0, 0, newW, newH, 0, 0, w, h, null);
+        g.dispose();
+        return dimg;
     }
 }

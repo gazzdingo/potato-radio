@@ -1,7 +1,5 @@
 
 
-import sun.tools.tree.SynchronizedStatement;
-
 import javax.sound.sampled.*;
 import java.io.*;
 import java.net.*;
@@ -21,8 +19,8 @@ public class Client{
     long memory;
     private String ip;
     private boolean playingMusic = true;
-    private String leftIP;
-    private String rightIP;
+    private static String  leftIP;
+    private static String rightIP;
     private RMI rmi;
 
     public Client(String serverURI, String userName) throws RemoteException, NotBoundException, MalformedURLException, UnknownHostException {
@@ -72,57 +70,59 @@ public class Client{
     }
 
     public synchronized void setUpIP()  {
-        while(playingMusic){
+        while(playingMusic) {
 
             String ip = null;
             try {
                 ip = InetAddress.getLocalHost().getHostAddress();
 
 
-            try{
-                remoteServer.ipAddresses();
-             }
-             catch (Exception e){
-                startElectionMessage();
-             }
-            if(!remoteServer.ipAddresses().contains(ip)) {
-                System.out.println("test");
-                remoteServer.addHost(ip);
-            }
+                try {
+                    remoteServer.ipAddresses();
+                } catch (Exception e) {
+                    startElectionMessage();
+                }
+                if (!remoteServer.ipAddresses().contains(ip)) {
+                    System.out.println("test");
+                    remoteServer.addHost(ip);
+                }
 
-            //looping through setting up the the right and left ip for the leader election
-            for (int i =0 ; i< remoteServer.ipAddresses().size(); i++){
-                //checking to make sure that it is not the first client
-                    if(remoteServer.ipAddresses().size() != 1){
+                //looping through setting up the the right and left ip for the leader election
+                for (int i = 0; i < remoteServer.ipAddresses().size(); i++) {
+                    //checking to make sure that it is not the first client
+                    if (remoteServer.ipAddresses().size() != 1) {
                         //checking if it is the end client
-                        if(i == 0){
-                            leftIP = remoteServer.ipAddresses().get(remoteServer.ipAddresses().size()-1);
-                            rightIP = remoteServer.ipAddresses().get(i+1);
-                        }
-                        else if(remoteServer.ipAddresses().size()-1 == i){
+                        if (i == 0) {
+                            leftIP = remoteServer.ipAddresses().get(remoteServer.ipAddresses().size() - 1);
+                            rightIP = remoteServer.ipAddresses().get(i + 1);
+                        } else if (remoteServer.ipAddresses().size() - 1 == i) {
                             //assigning the left and right ip
-                            leftIP = remoteServer.ipAddresses().get(i-1);
+                            leftIP = remoteServer.ipAddresses().get(i - 1);
                             rightIP = remoteServer.ipAddresses().get(0);
-                        }else{
+                        } else {
                             //assigning  the left and right ip
-                            leftIP = remoteServer.ipAddresses().get(i-1);
-                            rightIP = remoteServer.ipAddresses().get(i+1);
+                            leftIP = remoteServer.ipAddresses().get(i - 1);
+                            rightIP = remoteServer.ipAddresses().get(i + 1);
                         }
 
-                    }
-                    else{
+                    } else {
                         leftIP = (ip);
                         rightIP = (ip);
                     }
                 }
-                Thread.sleep(2000);
+                Thread.sleep(20);
 
 
             } catch (Exception e) {
-                e.printStackTrace();
+                startElectionMessage();
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+
             }
         }
-
     }
 
 
@@ -140,14 +140,22 @@ public class Client{
     /**
      * this will be run in a thead to  loop though and check if someone has send you a leader election
      */
-    public synchronized void checkForElections() {
+    public void checkForElections() {
+        ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket(RMI.TCP_ELECTION_PORT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         while (checkForElections) {
             try {
-                Thread.sleep(100);
-            ServerSocket serverSocket = new ServerSocket(RMI.TCP_ELECTION_PORT);
 
             //get the client socket
-            Socket clientSocket = serverSocket.accept();
+                serverSocket.setSoTimeout(10000);
+
+                Socket clientSocket = serverSocket.accept();
+                System.out.println(clientSocket.getInetAddress());
             //the object input stream
             ObjectInputStream objInStream = new ObjectInputStream(clientSocket.getInputStream());
             // the election object
@@ -178,7 +186,6 @@ public class Client{
                 sendMessageLeft(election);
             }
         } catch(Exception e){
-                System.out.println(e.getMessage());
             }
 
 
@@ -196,6 +203,7 @@ public class Client{
             //setting up the tcp sending socket
             System.out.println(getLeftIP());
             Socket clientSocket = new Socket(getLeftIP(), RMI.TCP_ELECTION_PORT);
+
             // writing the object to the output buffer
             ObjectOutputStream outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
             outToServer.writeObject(election);
@@ -229,7 +237,7 @@ public class Client{
      * this will give you you left ip
      * @return
      */
-    private String getLeftIP() {
+    private static String getLeftIP() {
         return leftIP;
     }
 
@@ -332,16 +340,27 @@ public class Client{
                 return null;
            return  remoteServer.messages();
         } catch (Exception e) {
-            startElectionMessage();
+
+                startElectionMessage();
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
 
             }
         return null;
     }
     public void addMessage(String message){
         try {
-            remoteServer.addMessage(String.format("potato man %s: %s", userName,message),new VectorTimeStamp());
+            remoteServer.addMessage(String.format("potato man %s: %s", userName,message),new VectorClock());
         } catch (Exception e) {
             startElectionMessage();
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 
