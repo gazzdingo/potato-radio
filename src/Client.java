@@ -194,6 +194,7 @@ public class Client{
     private void sendMessageLeft(Election election) {
         try {
             //setting up the tcp sending socket
+            System.out.println(getLeftIP());
             Socket clientSocket = new Socket(getLeftIP(), RMI.TCP_ELECTION_PORT);
             // writing the object to the output buffer
             ObjectOutputStream outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -327,9 +328,11 @@ public class Client{
 
     public List<String> getMessages(){
         try {
-            return remoteServer.messages();
+            if(remoteServer.messages() == null)
+                return null;
+           return  remoteServer.messages();
         } catch (Exception e) {
-                startElectionMessage();
+            startElectionMessage();
 
             }
         return null;
