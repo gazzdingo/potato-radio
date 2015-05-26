@@ -18,7 +18,7 @@ import java.util.*;
 public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
 
     public static final String BIND_NAME = "potatoserver";
-    public static final int TCP_ELECTION_PORT = 8181 ;
+    public static final int TCP_ELECTION_PORT = 8787 ;
     public static final int UDP_MUSIC_PORT = 8182 ;
     public static final int MUSIC_BYTE_SEND_SIZE = 2500 ;
     public static final int RMI_PORT = 1099;
@@ -31,7 +31,6 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
         super();
         hosts = new LinkedList<>();
         messages = new LinkedList<>();
-
     }
 
        public void start() throws Exception {
@@ -119,20 +118,6 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public  void send() {
         Mixer.Info minfo[] = AudioSystem.getMixerInfo() ;
         for( int i = 0 ; i < minfo.length ; i++ )
@@ -172,11 +157,11 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
 
 
     public  AudioFormat getAudioFormat(){
-        float sampleRate = 8000.0F;
+        float sampleRate = 44100.0F;
         //8000,11025,16000,22050,44100
         int sampleSizeInBits = 16;
         //8,16
-        int channels = 1;
+        int channels = 2;
         //1,2
         boolean signed = true;
         //true,false

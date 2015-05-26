@@ -17,21 +17,24 @@ public class StartScreen {
 
     public  StartScreen(){
         jframe = new JFrame("Potato Radio Talk-Back");
-        Dimension d = new Dimension(650,400);
+        Dimension d = new Dimension(780,450);
         jframe.setSize(d);
         init();
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jframe.setLocationRelativeTo(null);
         jframe.setVisible(true);
-
-
     }
 
     private void init() {
         JPanel pane = new JPanel();
+
+
+
         JButton btnStartServer = new JButton("Start Server");
         JTextField serverHost = new JTextField();
         serverHost.setPreferredSize(new Dimension(160, 20));
+
+
         JButton btnStartClient = new JButton("StartClient");
         JTextField username = new JTextField("");
             btnStartClient.addActionListener(e -> {
@@ -109,6 +112,7 @@ public class StartScreen {
         });
 
         messages.setEditable(false);
+
 
 
 
