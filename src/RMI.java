@@ -61,7 +61,7 @@ public class RMI extends UnicastRemoteObject implements RemoteMusicInter{
     }
 
     @Override
-    public void addMessage(String message, VectorTimeStamp timeStamp) throws RemoteException {
+    public void addMessage(String message, VectorClock timeStamp) throws RemoteException {
         messages.add(message);
     }
 

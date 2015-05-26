@@ -1,7 +1,5 @@
 
 
-import sun.tools.tree.SynchronizedStatement;
-
 import javax.sound.sampled.*;
 import java.io.*;
 import java.net.*;
@@ -336,7 +334,7 @@ public class Client{
     }
     public void addMessage(String message){
         try {
-            remoteServer.addMessage(String.format("potato man %s: %s", userName,message),new VectorTimeStamp());
+            remoteServer.addMessage(String.format("potato man %s: %s", userName,message),new VectorClock());
         } catch (Exception e) {
             startElectionMessage();
         }
